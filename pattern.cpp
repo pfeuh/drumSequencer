@@ -30,16 +30,36 @@
 
 PATTERN::PATTERN()
 {
+    for(byte step=0; step < PATTERN_NB_STEPS; step++)
+    {
+        for(byte index = 0; index < KIT_NB_INSTRUMENTS; index++)
+            setNote(step, index, 1);
+        setGroove(PATTERN_GROOVE_DOUBLE_CROCHE);
+        setLastNote(15);
+    }
+
 }
 
-byte PATTERN::getNote(byte index)
+bool  PATTERN::getNote(byte step, byte index)
 {
-    return notes[index];
+    if(index <= 7)
+        return (notes[step * 2 + 1] & (1 << (index - 8))) != 0;
+    else
+        return (notes[step * 2] & (1 << index)) != 0;
 }
 
-void PATTERN::setNote(byte index, byte note)
+void  PATTERN::setNote(byte step, byte index, bool value)
 {
-    notes[index] = note;
+    if(index <= 7)
+    {
+        notes[step * 2 + 1] &= ~(1 << index);
+        notes[step * 2 + 1] |= value << index;
+    }
+    else
+    {
+        notes[step * 2] &= ~(1 << (index - 8));
+        notes[step * 2] |= value << (index - 8);
+    }
 }
 
 byte PATTERN::getGroove()

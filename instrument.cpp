@@ -19,6 +19,11 @@
 
 #include "instrument.h"
 
+#define INSTRUMENT_CHANNEL_MASK 0x0f
+
+#define INSTRUMENT_TYPE_MASK 0x30
+#define INSTRUMENT_TYPE_POSITION 4
+
 /*******************/
 /* Private methods */
 /*******************/
@@ -32,55 +37,62 @@ INSTRUMENT::INSTRUMENT()
 {
 }
 
-void INSTRUMENT::setNote(byte _note)
+void INSTRUMENT::setName(char* _name)
 {
-    note = _note;
+    for (byte x=0; x < INSTRUMENT_NAME_SIZE; x++)
+        data[INSTRUMENT_NAME_OFFSET + x] = *(_name + x);
 }
 
 void INSTRUMENT::setChannel(byte _channel)
 {
-    channel = _channel;
-}
-
-void INSTRUMENT::setName(char* _name)
-{
-    for (byte x=0; x < INSTRUMENT_NAME_SIZE; x++)
-    name[x] = *(_name + x);
+    // passed as [1:16], stored as [0:15]
+    data[INSTRUMENT_PARAMS_OFFSET] &= ~INSTRUMENT_CHANNEL_MASK;
+    data[INSTRUMENT_PARAMS_OFFSET] |= _channel - 1;
 }
 
 void INSTRUMENT::setType(byte _type)
 {
-    type = _type;
+    // passed as [0, 1, 2], stored as [0x00, 0x10, 0x20]
+    data[INSTRUMENT_PARAMS_OFFSET] &= ~INSTRUMENT_TYPE_MASK;
+    data[INSTRUMENT_PARAMS_OFFSET] |= _type << INSTRUMENT_TYPE_POSITION;
+}
+
+void INSTRUMENT::setNote(byte _note)
+{
+    data[INSTRUMENT_NOTE_OFFSET] = _note;
 }
 
 void INSTRUMENT::setVelocity(byte _velocity)
 {
-    velocity = _velocity;
+    data[INSTRUMENT_VELOCITY_OFFSET] = _velocity;
 }
 
 byte INSTRUMENT::getNote()
 {
-    return note; 
+    return data[INSTRUMENT_NOTE_OFFSET]; 
 }
 
 byte INSTRUMENT::getChannel()
 {
-    return channel; 
+    return (data[INSTRUMENT_PARAMS_OFFSET]  & INSTRUMENT_CHANNEL_MASK) + 1;
 }
 
 char* INSTRUMENT::getName()
 {
-    return name; 
+    return (char*)&data[INSTRUMENT_NAME_OFFSET]; 
 }
 
 byte INSTRUMENT::getType()
 {
-    return type; 
+    return (data[INSTRUMENT_PARAMS_OFFSET] & INSTRUMENT_TYPE_MASK) >> INSTRUMENT_TYPE_POSITION;
 }
 
 byte INSTRUMENT::getVelocity()
 {
-    return velocity; 
+    return data[INSTRUMENT_VELOCITY_OFFSET]; 
 }
 
-
+byte* INSTRUMENT::getDataPointer()
+{
+    return (byte*)&data;
+}

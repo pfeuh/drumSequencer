@@ -21,10 +21,11 @@
  */
 
 #include <Arduino.h>
+#include "kit.h"
 
 #define PATTERN_VERSION "1.00"
 
-#define PATTERN_NB_NOTES 32
+#define PATTERN_NB_STEPS 32
 
 #define PATTERN_GROOVE_NOIRE 0
 #define PATTERN_GROOVE_CROCHE 1
@@ -42,8 +43,8 @@ class PATTERN
 {
     public:
         PATTERN();
-        byte  getNote(byte index);
-        void  setNote(byte index, byte note);
+        bool  getNote(byte step, byte index);
+        void  setNote(byte step, byte index, bool value);
     
         byte  getGroove();
         void  setGroove(byte groove);
@@ -52,7 +53,7 @@ class PATTERN
         void  setLastNote(byte last_note);
     
     private:
-        byte  notes[PATTERN_NB_NOTES];
+        byte  notes[PATTERN_NB_STEPS * 2];
         byte  params; // last note + groove
 };
 

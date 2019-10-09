@@ -24,7 +24,17 @@
 
 #define INSTRUMENT_VERSION "1.00"
 
+#define INSTRUMENT_TYPE_ON 0
+#define INSTRUMENT_TYPE_ON_OFF 1
+#define INSTRUMENT_TYPE_TRIG 2
+
 #define INSTRUMENT_NAME_SIZE 16
+#define INSTRUMENT_NAME_OFFSET 0
+#define INSTRUMENT_NOTE_OFFSET (INSTRUMENT_NAME_OFFSET + INSTRUMENT_NAME_SIZE)
+#define INSTRUMENT_PARAMS_OFFSET (INSTRUMENT_NOTE_OFFSET + 1)
+#define INSTRUMENT_VELOCITY_OFFSET (INSTRUMENT_PARAMS_OFFSET + 1)
+#define INSTRUMENT_DATA_SIZE (INSTRUMENT_VELOCITY_OFFSET + 1)
+
 class INSTRUMENT
 {
     public:
@@ -40,13 +50,10 @@ class INSTRUMENT
         void  setName(char* _name);
         void  setType(byte _type);
         void  setVelocity(byte _velocity);
+        byte* getDataPointer();
     
     private:
-        byte  note;
-        byte  channel;
-        char  name[INSTRUMENT_NAME_SIZE];
-        byte  type;
-        byte  velocity;
+        byte data[INSTRUMENT_DATA_SIZE];
 };
 
 #endif

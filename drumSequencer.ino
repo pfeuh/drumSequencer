@@ -19,34 +19,79 @@
 
 #include "drumSequencer.h"
 
-DRUM_SEQUENCER item = DRUM_SEQUENCER();
+DRUM_SEQUENCER seq = DRUM_SEQUENCER();
 
-const char PROGMEM title[] = "drumSequencer v. " DRUM_SEQUENCER_VERSION;
+const char PROGMEM title[] = "drumSequencer v. " DRUM_SEQUENCER_VERSION "\n";
 
-const char PROGMEM timestamp[] = __DATE__ " " __TIME__;
+const char PROGMEM timestamp[] = __DATE__ " " __TIME__ "\n";
 
-#define CONSOLE_OUT_DEV Serial
-
-void cPrint(const char* address)
+void printNibble(byte value)
 {
-    while(pgm_read_byte(address))
-        CONSOLE_OUT_DEV.write(pgm_read_byte(address++));
+    value &= 0x0f;
+    if(value < 10)
+        Serial.write(value +'0');
+    else
+        Serial.write(value +'a' - 10);
 }
 
-void cPrintLn(const char* address)
+void printByte(byte value)
 {
-    cPrint(address);
-    CONSOLE_OUT_DEV.write('\n');
+    printNibble(value >> 4);
+    printNibble(value);
+}
+
+void dumpRam(byte* addr)
+{
+    for(word x = 0; x < 256; x++)
+    {
+        printByte(*(addr + x));
+        Serial.write(' ');
+        if(x % 16 == 15)
+            Serial.write('\n');
+    }
+    printByte(*(addr + 256));
+    Serial.write('\n');
+}
+
+void print_P(const char* address)
+{
+    while(pgm_read_byte(address))
+        Serial.write(pgm_read_byte(address++));
 }
 
 void setup()
 {
     //~ item.begin();
-    CONSOLE_OUT_DEV.begin(9600);
-    cPrintLn(title);
-    cPrintLn(timestamp);
+    Serial.begin(9600);
+    print_P(title);
+    print_P(timestamp);
 
     pinMode(LED_BUILTIN, OUTPUT);
+    
+    KIT* kit = seq.getKit();
+    
+    for(byte index=0; index < KIT_NB_INSTRUMENTS; index++)
+    {
+        INSTRUMENT* inst = kit->getInstrument(index);
+        Serial.print((const char*)inst->getDataPointer());
+        Serial.write(' ');
+        Serial.print(inst->getNote());
+        Serial.write(' ');
+        Serial.print(inst->getChannel());
+        Serial.write(' ');
+        Serial.print(inst->getType());
+        Serial.write(' ');
+        Serial.print(inst->getVelocity());
+        Serial.write('\n');
+    }
+    
+    SONG* song = seq.getSong(0);
+    for(byte x = 0; x < 16; x++)
+        song->setPattern(240 + x, x);
+    song->insertPattern(240, 0x33);
+    //~ song->insertPattern(255, 0x44);
+    dumpRam(song->getDataPointer());
+
 }
 
 void loop()

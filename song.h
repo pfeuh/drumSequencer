@@ -1,8 +1,8 @@
-#ifndef drumSequencer_h
-#define drumSequencer_h
+#ifndef song_h
+#define song_h
 
 /*
- * file : drumSequencer.h
+ * file : song.h
  * Copyright (c) pfeuh <ze.pfeuh@gmail>
  * All rights reserved.
  * 
@@ -21,28 +21,34 @@
  */
 
 #include <Arduino.h>
-#include "pattern.h"
-#include "kit.h"
-#include "song.h"
+#include "instrument.h"
 
-#define DRUM_SEQUENCER_VERSION "1.00"
+#define SONG_VERSION "1.00"
 
-#define DRUM_SEQUENCER_NB_PATTERNS 16
-#define DRUM_SEQUENCER_NB_SONGS 4
+#define SONG_NB_MEASURES 256
+#define SONG_INDEX_LAST_MEASURE (0 + SONG_NB_MEASURES)
+#define SONG_DATA_SIZE (SONG_INDEX_LAST_MEASURE + 1)
 
-class DRUM_SEQUENCER
+class SONG
 {
     public:
-        DRUM_SEQUENCER();
-        void sequencer();
-        KIT* getKit();
-        PATTERN* getPattern(byte index);
-        SONG* getSong(byte index);
-
+        SONG();
+        void initialize();
+        byte getPattern(word _cursor);
+        void setPattern(word _cursor, byte pattern);
+        void insertPattern(word _cursor, byte pattern);
+        void cutPattern(word _cursor);
+        word getCursor();
+        void setcursor(word _cursor);
+        void setNbMeasures(word nb_measures);
+        word getNbMeasures();
+        byte* getDataPointer();
+    
     private:
-        PATTERN patterns[DRUM_SEQUENCER_NB_PATTERNS];
-        KIT kit;
-        SONG songs[DRUM_SEQUENCER_NB_SONGS];
+        byte data[SONG_NB_MEASURES];
+        word cursor;
+        word nbMeasures;
+    
 };
 
 #endif

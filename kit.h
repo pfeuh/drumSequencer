@@ -33,13 +33,13 @@ class KIT
 {
     public:
         KIT();
+        void initialize();
         INSTRUMENT* getInstrument(byte index);
-        void setInstrument(byte index, INSTRUMENT* instrument);
         char* getName();
         void setName(char* _name);
     
     private:
-        INSTRUMENT* instruments[KIT_NB_INSTRUMENTS];
+        INSTRUMENT instruments[KIT_NB_INSTRUMENTS];
         char name[KIT_NAME_SIZE];
     
 };

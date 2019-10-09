@@ -36,4 +36,19 @@ void DRUM_SEQUENCER::sequencer()
 {
 }
 
+KIT* DRUM_SEQUENCER::getKit()
+{
+    return &kit;
+}
+
+PATTERN* DRUM_SEQUENCER::getPattern(byte index)
+{
+    return &patterns[index];
+}
+
+SONG* DRUM_SEQUENCER::getSong(byte index)
+{
+    return &songs[index];
+}
+
 
