@@ -39,22 +39,36 @@
 #define PATTERN_LAST_NOTE_MASK 0xf8
 #define PATTERN_LAST_NOTE_POSITION 3
 
+#define PATTERN_STEPS_OFFSET 0
+#define PATTERN_PARAMS_OFFSET (PATTERN_STEPS_OFFSET + PATTERN_NB_STEPS * 2)
+#define PATTERN_DATA_SIZE (PATTERN_PARAMS_OFFSET + 1)
+
+#define BD 0
+#define SD 1
+#define HH 3
+#define ON true
+#define OFF false
+
 class PATTERN
 {
     public:
         PATTERN();
-        bool  getNote(byte step, byte index);
-        void  setNote(byte step, byte index, bool value);
+        void initialize();
+        bool getNote(byte step_num, byte inst_num);
+        void setNote(byte step_num, byte inst_num, bool value);
     
-        byte  getGroove();
-        void  setGroove(byte groove);
+        byte getGroove();
+        void setGroove(byte _groove);
     
-        byte  getLastNote();
-        void  setLastNote(byte last_note);
+        byte getLastStep();
+        void setLastStep(byte last_step);
+
+        word steps[PATTERN_NB_STEPS];
     
     private:
-        byte  notes[PATTERN_NB_STEPS * 2];
-        byte  params; // last note + groove
+        byte groove;
+        byte lastStep;
+
 };
 
 #endif

@@ -30,57 +30,73 @@
 
 PATTERN::PATTERN()
 {
-    for(byte step=0; step < PATTERN_NB_STEPS; step++)
-    {
-        for(byte index = 0; index < KIT_NB_INSTRUMENTS; index++)
-            setNote(step, index, 1);
-        setGroove(PATTERN_GROOVE_DOUBLE_CROCHE);
-        setLastNote(15);
-    }
-
+    initialize();
 }
 
-bool  PATTERN::getNote(byte step, byte index)
+void PATTERN::initialize()
 {
-    if(index <= 7)
-        return (notes[step * 2 + 1] & (1 << (index - 8))) != 0;
-    else
-        return (notes[step * 2] & (1 << index)) != 0;
+    for(byte step_num=0; step_num < PATTERN_NB_STEPS; step_num++)
+        steps[step_num] = 0;
+
+    setGroove(PATTERN_GROOVE_DOUBLE_CROCHE);
+    setLastStep(PATTERN_NB_STEPS - 1);
+
+    setNote(0,  BD, ON);
+    setNote(8,  BD, ON);
+    setNote(16, BD, ON);
+    setNote(24, BD, ON);
+
+    setNote(4,  SD, ON);
+    setNote(12, SD, ON);
+    setNote(20, SD, ON);
+    setNote(28, SD, ON);
+
+    setNote(0,  HH, ON);
+    setNote(2,  HH, ON);
+    setNote(4,  HH, ON);
+    setNote(6,  HH, ON);
+    setNote(8,  HH, ON);
+    setNote(10, HH, ON);
+    setNote(12, HH, ON);
+    setNote(14, HH, ON);
+    setNote(16, HH, ON);
+    setNote(18, HH, ON);
+    setNote(20, HH, ON);
+    setNote(22, HH, ON);
+    setNote(24, HH, ON);
+    setNote(26, HH, ON);
+    setNote(28, HH, ON);
+    setNote(30, HH, ON);
 }
 
-void  PATTERN::setNote(byte step, byte index, bool value)
+bool  PATTERN::getNote(byte step_num, byte inst_num)
 {
-    if(index <= 7)
-    {
-        notes[step * 2 + 1] &= ~(1 << index);
-        notes[step * 2 + 1] |= value << index;
-    }
-    else
-    {
-        notes[step * 2] &= ~(1 << (index - 8));
-        notes[step * 2] |= value << (index - 8);
-    }
+    return (steps[step_num] & (1 << inst_num)) != 0;
+}
+
+void  PATTERN::setNote(byte step_num, byte inst_num, bool value)
+{
+    steps[step_num] &= ~(1 << inst_num);
+    steps[step_num] |= value << inst_num;
 }
 
 byte PATTERN::getGroove()
 {
-    return params & PATTERN_GROOVE_MASK;
+    return groove;
 }
 
-void PATTERN::setGroove(byte groove)
+void PATTERN::setGroove(byte _groove)
 {
-    params &= ~PATTERN_GROOVE_MASK;
-    params |= groove;
+    groove = _groove;
 }
 
-byte PATTERN::getLastNote()
+byte PATTERN::getLastStep()
 {
-    return (params & PATTERN_LAST_NOTE_MASK) >> PATTERN_LAST_NOTE_POSITION;
+    return lastStep;
 }
 
-void PATTERN::setLastNote(byte last_note)
+void PATTERN::setLastStep(byte last_step)
 {
-    params &= ~PATTERN_GROOVE_MASK;
-    params |= last_note << PATTERN_LAST_NOTE_POSITION;
+    lastStep = last_step;
 }
 
