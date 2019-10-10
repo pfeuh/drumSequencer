@@ -20,59 +20,20 @@
 #include "drumSequencer.h"
 #include "romPatterns.h"
 
+#define peek pgm_read_byte
+#define wpeek pgm_read_word
+
 #define console Serial
 DRUM_SEQUENCER seq = DRUM_SEQUENCER();
 
-#include "arduinoDebug.h"
-ARDUINO_DEBUG debug = ARDUINO_DEBUG();
+//~ #include "arduinoDebug.h"
+//~ ARDUINO_DEBUG debug = ARDUINO_DEBUG();
 
 const char PROGMEM title[] = "drumSequencer v. " DRUM_SEQUENCER_VERSION "\n";
 const char PROGMEM timestamp[] = __DATE__ " " __TIME__ "\n";
 
 unsigned long int userValue = 0;
 char userCommand = '\0';
-
-void printNibble(byte value)
-{
-    value &= 0x0f;
-    if(value < 10)
-        console.write(value +'0');
-    else
-        console.write(value +'a' - 10);
-}
-
-void printByte(byte value)
-{
-    printNibble(value >> 4);
-    printNibble(value);
-}
-
-void dumpRam(byte* addr)
-{
-    for(word x = 0; x < 256; x++)
-    {
-        printByte(*(addr + x));
-        console.write(' ');
-        if(x % 16 == 15)
-            console.write('\n');
-    }
-    printByte(*(addr + 256));
-    console.write('\n');
-}
-
-void printWordBin(word value)
-{
-    word weight = 0x8000;
-    
-    for(byte x = 0;x < 16; x++)
-    {
-        if(value & weight)
-            console.print('1');
-        else
-            console.print('0');
-        weight >>= 1;
-    }
-}
 
 void printLabel(char* label)
 {
@@ -101,42 +62,18 @@ void printLabel(char* label)
     }
 }
 
-void printBinaryPattern(byte pattern_num)
+void print2digits(byte value)
 {
-    PATTERN* pattern = seq.getPattern(pattern_num);
-    
-    console.print(F("\n\n\n\n\n\n PATTERN "));
-    console.print(pattern_num + 1);
-    console.print(F(" - groove "));
-    console.print(pattern->getGroove());
-    console.print(F(" - last_step "));
-    console.print(pattern->getLastStep() + 1);
-    console.write('\n');
-    
-    for(byte step_num = 0; step_num < PATTERN_NB_STEPS; step_num++)
-    {
-        printWordBin(pattern->getStep(step_num));
-        console.write('\n');
-    }
+    console.write('0' + value / 10);
+    value %= 10;
+    console.write('0' + value);
 }
 
-void printBinaryRomPattern(byte pattern_num)
+void print3digits(byte value)
 {
-    word pattern = pgm_read_word(ROM_PATTERNS_getPatternsTable() + pattern_num);
-    
-    console.print(F("\n\n\n\n\n\n PATTERN "));
-    console.print(pattern_num + 1);
-    //~ console.print(F(" - groove "));
-    //~ console.print(pattern->getGroove());
-    //~ console.print(F(" - last_step "));
-    //~ console.print(pattern->getLastStep() + 1);
-    console.write('\n');
-    
-    for(byte step_num = 0; step_num < PATTERN_NB_STEPS; step_num++)
-    {
-        printWordBin(pgm_read_word(pattern + step_num));
-        console.write('\n');
-    }
+    console.write('0' + value / 100);
+    value %= 100;
+    print2digits(value);
 }
 
 void printPattern(byte pattern_num)
@@ -174,10 +111,38 @@ void printPattern(byte pattern_num)
     }
 }
 
+void printSong(byte song_num)
+{
+    SONG* song = seq.getSong(song_num);
+    
+    console.print(F("\n\n\n\n\n\n SONG "));
+    console.print(song_num + 1);
+    console.print(F(" - last_measure "));
+    console.print(song->getNbMeasures());
+    console.write('\n');
+    
+    for(word cursor = 0; cursor < song->getNbMeasures(); cursor++)
+    {
+        if(!(cursor%16))
+        {
+            print3digits(cursor + 1);
+            console.write(' ');
+        }
+        
+        print2digits(song->getPattern(cursor));
+        console.write(' ');
+        
+        if((cursor%16) == 15)
+            console.write('\n');
+    }
+    if(song->getNbMeasures() % 16)
+        console.write('\n');
+}
+
 void print_P(const char* address)
 {
-    while(pgm_read_byte(address))
-        console.write(pgm_read_byte(address++));
+    while(peek(address))
+        console.write(peek(address++));
 }
 
 void executeComand(char command, unsigned long int value)
@@ -188,11 +153,8 @@ void executeComand(char command, unsigned long int value)
         case 'p':
             printPattern(value - 1);
             break;
-        case 'b':
-            printBinaryPattern(value - 1);
-            break;
-        case 'r':
-            printBinaryRomPattern(value - 1);
+        case 's':
+            printSong(value - 1);
             break;
         default:
             console.print(F("Unknown command!\n"));
@@ -247,6 +209,10 @@ void setup()
     
     for(byte x = 0; x < 6; x++)
         ROM_PATTERN_copy(seq.getPattern(x), x);
+
+    seq.getSong(0)->setNbMeasures(256);
+    for(word x = 0; x < 256; x++)
+        seq.getSong(0)->setPattern(x, x % 100);
 }
 
 void loop()

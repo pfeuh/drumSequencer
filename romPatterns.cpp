@@ -31,13 +31,13 @@
 
 #define BD 0x0001 // Bass drum
 #define SD 0x0002 // Snare drum
-#define RS 0x0004 // Rim shot
-#define OH 0x0008 // Open hit hat
-#define FH 0x0010 // Foot hit hat
-#define HH 0x0020 // Closed hit hat
-#define RD 0x0040 // Ride cymbal
+#define RD 0x0004 // Ride cymbal
+#define HH 0x0008 // Closed hit hat
+#define OH 0x0010 // Open hit hat
+#define FH 0x0020 // Foot hit hat
+#define RB 0x0040 // Ride Bell
 #define CR 0x0080 // Crash cymbal
-#define RB 0x0100 // Ride Bell
+#define RS 0x0100 // Rim shot
 #define LT 0x0200 // Low tom
 #define MT 0x0400 // Mid tom
 #define HT 0x0800 // High tom
@@ -124,31 +124,31 @@ const word ROM_PATTERNS_bossaNova[] PROGMEM =
     /*  1 */ 0,
     /*  2 */ HH | 0,
     /*  3 */ 0,
-    /*  4 */ SD | HH,
+    /*  4 */ RS | HH,
     /*  5 */ 0,
     /*  6 */ HH | BD,
     /*  7 */ 0,
     /*  8 */ HH | BD,
     /*  9 */ 0,
-    /* 10 */ SD | HH,
+    /* 10 */ RS | HH,
     /* 11 */ 0,
     /* 12 */ HH,
     /* 13 */ 0,
     /* 14 */ HH | BD,
     /* 15 */ 0,
-    /* 16 */ SD | HH | BD,
+    /* 16 */ RS | HH | BD,
     /* 17 */ 0,
     /* 18 */ HH,
     /* 19 */ 0,
     /* 20 */ HH,
     /* 21 */ 0,
-    /* 22 */ SD | HH | BD,
+    /* 22 */ RS | HH | BD,
     /* 23 */ 0,
     /* 24 */ HH | BD,
     /* 25 */ 0,
     /* 26 */ HH,
     /* 27 */ 0,
-    /* 28 */ SD | HH,
+    /* 28 */ RS | HH,
     /* 29 */ 0,
     /* 30 */ HH | BD,
     /* 31 */ 0,

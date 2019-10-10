@@ -25,13 +25,13 @@ const byte KIT_instrumentNotes[] PROGMEM =
 {
     36, // Bass drum
     38, // Snare drum
-    37, // Rim shot
-    46, // Open hit hat
-    44, // Foot hit hat
     42, // Closed hit hat
     51, // Ride cymbal
-    49, // Crash cymbal
+    46, // Open hit hat
+    44, // Foot hit hat
     53, // Ride Bell
+    49, // Crash cymbal
+    37, // Rim shot
     45, // Low tom
     47, // Mid tom
     49, // High tom
@@ -43,13 +43,13 @@ const byte KIT_instrumentNotes[] PROGMEM =
 
 extern const char KIT_labelBassDrum[] PROGMEM = "Bass drum";
 extern const char KIT_labelSnareDrum[] PROGMEM = "Snare drum";
-extern const char KIT_labelRimShot[] PROGMEM = "Rim shot";
+extern const char KIT_labelRideCymbal[] PROGMEM = "Ride cymbal";
+extern const char KIT_labelClosedHitHat[] PROGMEM = "Closed hit hat";
 extern const char KIT_labelOpenHitHat[] PROGMEM = "Open hit hat";
 extern const char KIT_labelFootHitHat[] PROGMEM = "Foot hit hat";
-extern const char KIT_labelClosedHitHat[] PROGMEM = "Closed hit hat";
-extern const char KIT_labelRideCymbal[] PROGMEM = "Ride cymbal";
-extern const char KIT_labelCrashCymbal[] PROGMEM = "Crash cymbal";
 extern const char KIT_labelRideBell[] PROGMEM = "Ride Bell";
+extern const char KIT_labelCrashCymbal[] PROGMEM = "Crash cymbal";
+extern const char KIT_labelRimShot[] PROGMEM = "Rim shot";
 extern const char KIT_labelLowTom[] PROGMEM = "Low tom";
 extern const char KIT_labelMidTom[] PROGMEM = "Mid tom";
 extern const char KIT_labelHighTom[] PROGMEM = "High tom";
@@ -62,13 +62,13 @@ const char *const KIT_instrumentLabels[] PROGMEM =
 {
     KIT_labelBassDrum,
     KIT_labelSnareDrum,
-    KIT_labelRimShot,
+    KIT_labelRideCymbal,
+    KIT_labelClosedHitHat,
     KIT_labelOpenHitHat,
     KIT_labelFootHitHat,
-    KIT_labelClosedHitHat,
-    KIT_labelRideCymbal,
-    KIT_labelCrashCymbal,
     KIT_labelRideBell,
+    KIT_labelCrashCymbal,
+    KIT_labelRimShot,
     KIT_labelLowTom,
     KIT_labelMidTom,
     KIT_labelHighTom,
