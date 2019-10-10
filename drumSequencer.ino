@@ -18,23 +18,27 @@
  */
 
 #include "drumSequencer.h"
+#include "romPatterns.h"
 
+#define console Serial
 DRUM_SEQUENCER seq = DRUM_SEQUENCER();
 
-#include <arduinoDebug.h>
+#include "arduinoDebug.h"
 ARDUINO_DEBUG debug = ARDUINO_DEBUG();
 
 const char PROGMEM title[] = "drumSequencer v. " DRUM_SEQUENCER_VERSION "\n";
-
 const char PROGMEM timestamp[] = __DATE__ " " __TIME__ "\n";
+
+unsigned long int userValue = 0;
+char userCommand = '\0';
 
 void printNibble(byte value)
 {
     value &= 0x0f;
     if(value < 10)
-        Serial.write(value +'0');
+        console.write(value +'0');
     else
-        Serial.write(value +'a' - 10);
+        console.write(value +'a' - 10);
 }
 
 void printByte(byte value)
@@ -48,12 +52,26 @@ void dumpRam(byte* addr)
     for(word x = 0; x < 256; x++)
     {
         printByte(*(addr + x));
-        Serial.write(' ');
+        console.write(' ');
         if(x % 16 == 15)
-            Serial.write('\n');
+            console.write('\n');
     }
     printByte(*(addr + 256));
-    Serial.write('\n');
+    console.write('\n');
+}
+
+void printWordBin(word value)
+{
+    word weight = 0x8000;
+    
+    for(byte x = 0;x < 16; x++)
+    {
+        if(value & weight)
+            console.print('1');
+        else
+            console.print('0');
+        weight >>= 1;
+    }
 }
 
 void printLabel(char* label)
@@ -65,7 +83,7 @@ void printLabel(char* label)
         {
             if(x < INSTRUMENT_NAME_SIZE)
             {
-                Serial.write(*label++);
+                console.write(*label++);
                 x++;
             }
             else
@@ -78,8 +96,46 @@ void printLabel(char* label)
     }        
     while(x < INSTRUMENT_NAME_SIZE)
     {
-        Serial.write(' ');
+        console.write(' ');
         x++;
+    }
+}
+
+void printBinaryPattern(byte pattern_num)
+{
+    PATTERN* pattern = seq.getPattern(pattern_num);
+    
+    console.print(F("\n\n\n\n\n\n PATTERN "));
+    console.print(pattern_num + 1);
+    console.print(F(" - groove "));
+    console.print(pattern->getGroove());
+    console.print(F(" - last_step "));
+    console.print(pattern->getLastStep() + 1);
+    console.write('\n');
+    
+    for(byte step_num = 0; step_num < PATTERN_NB_STEPS; step_num++)
+    {
+        printWordBin(pattern->getStep(step_num));
+        console.write('\n');
+    }
+}
+
+void printBinaryRomPattern(byte pattern_num)
+{
+    word pattern = pgm_read_word(ROM_PATTERNS_getPatternsTable() + pattern_num);
+    
+    console.print(F("\n\n\n\n\n\n PATTERN "));
+    console.print(pattern_num + 1);
+    //~ console.print(F(" - groove "));
+    //~ console.print(pattern->getGroove());
+    //~ console.print(F(" - last_step "));
+    //~ console.print(pattern->getLastStep() + 1);
+    console.write('\n');
+    
+    for(byte step_num = 0; step_num < PATTERN_NB_STEPS; step_num++)
+    {
+        printWordBin(pgm_read_word(pattern + step_num));
+        console.write('\n');
     }
 }
 
@@ -91,6 +147,14 @@ void printPattern(byte pattern_num)
     PATTERN* pattern = seq.getPattern(pattern_num);
     KIT* kit = seq.getKit();
     
+    console.print(F("\n\n\n\n\n\n PATTERN "));
+    console.print(pattern_num + 1);
+    console.print(F(" - groove "));
+    console.print(pattern->getGroove());
+    console.print(F(" - last_step "));
+    console.print(pattern->getLastStep() + 1);
+    console.write('\n');
+    
     while(weight)
     {
         printLabel(kit->getInstrument(inst_num)->getName());
@@ -98,13 +162,13 @@ void printPattern(byte pattern_num)
         for(byte step_num = 0; step_num < PATTERN_NB_STEPS; step_num++)
         {
             if(pattern->getNote(step_num, inst_num))
-                Serial.print(F("-O-"));
+                console.print(F("O"));
             else
-                Serial.print(F("-.-"));
+                console.print(F("-"));
         }
         
         // let's prepare next instrument line
-        Serial.write('\n');
+        console.write('\n');
         weight >>= 1;
         inst_num--;
     }
@@ -113,62 +177,82 @@ void printPattern(byte pattern_num)
 void print_P(const char* address)
 {
     while(pgm_read_byte(address))
-        Serial.write(pgm_read_byte(address++));
+        console.write(pgm_read_byte(address++));
+}
+
+void executeComand(char command, unsigned long int value)
+{
+    switch(command)
+    {
+        case '\0':
+        case 'p':
+            printPattern(value - 1);
+            break;
+        case 'b':
+            printBinaryPattern(value - 1);
+            break;
+        case 'r':
+            printBinaryRomPattern(value - 1);
+            break;
+        default:
+            console.print(F("Unknown command!\n"));
+            break;
+    }
+}
+
+void userSequencer()
+{
+    while(console.available())
+    {
+        char c = console.read();
+        switch(c)
+        {
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                userValue = userValue * 10 + c - '0';
+                break;
+            case '\n':
+                executeComand(userCommand, userValue);
+                userValue = 0;
+                userCommand = '\0';
+                break;
+            case '\r':
+            case '\t':
+            case ' ':
+                // ignored characters
+                break;
+            default:
+                // all the rest of ascii codes can be a command
+                userCommand = c;
+                break;
+        }
+    }
 }
 
 void setup()
 {
-    Serial.begin(9600);
+    console.begin(9600);
     print_P(title);
     print_P(timestamp);
 
     pinMode(LED_BUILTIN, OUTPUT);
     
-    //~ KIT* kit = seq.getKit();
-    
-    //~ for(byte index=0; index < KIT_NB_INSTRUMENTS; index++)
-    //~ {
-        //~ INSTRUMENT* inst = kit->getInstrument(index);
-        //~ Serial.print((const char*)inst->getDataPointer());
-        //~ Serial.write(' ');
-        //~ Serial.print(inst->getNote());
-        //~ Serial.write(' ');
-        //~ Serial.print(inst->getChannel());
-        //~ Serial.write(' ');
-        //~ Serial.print(inst->getType());
-        //~ Serial.write(' ');
-        //~ Serial.print(inst->getVelocity());
-        //~ Serial.write('\n');
-    //~ }
-    
-    //~ SONG* song = seq.getSong(0);
-    //~ for(byte x = 0; x < 16; x++)
-        //~ song->setPattern(240 + x, x);
-    //~ song->insertPattern(240, 0x33);
-    //~ dumpRam(song->getDataPointer());
-    
-    PATTERN* pattern = seq.getPattern(0);
-    //~ pattern->setNote(0,  BD, ON);
-    //~ pattern->setNote(8,  BD, ON);
-    //~ pattern->setNote(16, BD, ON);
-    //~ pattern->setNote(24, BD, ON);
-
-    //~ pattern->setNote(4,  SD, ON);
-    //~ pattern->setNote(12, SD, ON);
-    //~ pattern->setNote(20, SD, ON);
-    //~ pattern->setNote(28, SD, ON);
-
-    Serial.println(pattern->getLastStep());
-    Serial.println(pattern->getGroove());
-    printPattern(0);
-    
-    //~ dumpRam(pattern->getDataPointer());
-    //~ debug.dumpRam((byte*)pattern->steps, PATTERN_NB_STEPS * sizeof(word));
-
+    for(byte x = 0; x < 6; x++)
+        ROM_PATTERN_copy(seq.getPattern(x), x);
 }
 
 void loop()
 {
+    userSequencer();
+
     if(millis() & 0x200)
         digitalWrite(LED_BUILTIN, 0);
     else

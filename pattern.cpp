@@ -40,33 +40,16 @@ void PATTERN::initialize()
 
     setGroove(PATTERN_GROOVE_DOUBLE_CROCHE);
     setLastStep(PATTERN_NB_STEPS - 1);
+}
 
-    setNote(0,  BD, ON);
-    setNote(8,  BD, ON);
-    setNote(16, BD, ON);
-    setNote(24, BD, ON);
+word PATTERN::getStep(byte step_num)
+{
+    return steps[step_num];
+}
 
-    setNote(4,  SD, ON);
-    setNote(12, SD, ON);
-    setNote(20, SD, ON);
-    setNote(28, SD, ON);
-
-    setNote(0,  HH, ON);
-    setNote(2,  HH, ON);
-    setNote(4,  HH, ON);
-    setNote(6,  HH, ON);
-    setNote(8,  HH, ON);
-    setNote(10, HH, ON);
-    setNote(12, HH, ON);
-    setNote(14, HH, ON);
-    setNote(16, HH, ON);
-    setNote(18, HH, ON);
-    setNote(20, HH, ON);
-    setNote(22, HH, ON);
-    setNote(24, HH, ON);
-    setNote(26, HH, ON);
-    setNote(28, HH, ON);
-    setNote(30, HH, ON);
+void PATTERN::setStep(byte step_num, word step)
+{
+    steps[step_num] = step;
 }
 
 bool  PATTERN::getNote(byte step_num, byte inst_num)

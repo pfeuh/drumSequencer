@@ -1,5 +1,5 @@
 #ifndef pattern_h
-#define drumSequencer_h
+#define pattern_h
 
 /*
  * file : pattern.h
@@ -43,17 +43,15 @@
 #define PATTERN_PARAMS_OFFSET (PATTERN_STEPS_OFFSET + PATTERN_NB_STEPS * 2)
 #define PATTERN_DATA_SIZE (PATTERN_PARAMS_OFFSET + 1)
 
-#define BD 0
-#define SD 1
-#define HH 3
-#define ON true
-#define OFF false
-
 class PATTERN
 {
     public:
         PATTERN();
         void initialize();
+    
+        word getStep(byte step_num);
+        void setStep(byte step_num, word step);
+    
         bool getNote(byte step_num, byte inst_num);
         void setNote(byte step_num, byte inst_num, bool value);
     
@@ -63,9 +61,8 @@ class PATTERN
         byte getLastStep();
         void setLastStep(byte last_step);
 
-        word steps[PATTERN_NB_STEPS];
-    
     private:
+        word steps[PATTERN_NB_STEPS];
         byte groove;
         byte lastStep;
 
